@@ -1,31 +1,26 @@
-﻿// path/filename: ADS/Program.cs
-using System;
-using static ADS.Game;
-
-namespace ADS
+﻿namespace ADS
 {
     class Program
     {
         static void Main(string[] args)
         {
-            int choice;
-            Game game = new Game();
-            game.ReadFiles();
-
+            int pasirinkimas;
+            Zaidimas zaidimas = new Zaidimas();
+            zaidimas.Nuskaitymas(); 
             while (true)
             {
-                game.Start();
-                choice = game.DisplayInitialScreen() - '0';
-                if (choice == 1)
+                zaidimas.Pradzia();
+                pasirinkimas = zaidimas.PradinisEkranas() - '0';
+                if (pasirinkimas == 1)
                 {
-                    game.ChooseDifficulty();
-                    game.DisplayRules();
-                    game.Launch();
-                    game.ClearActionQueues();
+                    zaidimas.SudetingumoPasirinkimas();
+                    zaidimas.Taisykles();
+                    zaidimas.Paleidimas();
+                    zaidimas.Istrinimas();
                 }
                 else
                 {
-                    game.SayGoodbye();
+                    zaidimas.Atsisveikinimas();
                     break;
                 }
             }

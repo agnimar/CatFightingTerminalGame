@@ -1,5 +1,4 @@
-﻿// path/filename: ADS/UI.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,188 +7,216 @@ namespace ADS
 {
     public class UI
     {
-        protected string[] actionDisplay = new string[23];
-        protected string initialText, rules, farewell;
-        protected int myHealth, enemyHealth;
-        protected bool iHealed, enemyHealed;
-        protected bool isFighting, victory, paused;
-        protected Queue<int> myActions = new Queue<int>();
-        protected Queue<int> enemyActions = new Queue<int>();
+        protected string[] veiksmoVaizdas = new string[23];
+        protected string pradinisTekstas, taisykles, atsisveikinimas;
+        protected int manoGyvybes, priesoGyvybes;
+        protected bool asPasigydziau, priesasPasigyde;
+        protected bool vykstaMustynes, pergale, sustabdyta;
+        protected Queue<int> manoVeiksmai = new Queue<int>();
+        protected Queue<int> priesoVeiksmai = new Queue<int>();
         protected Random random = new Random();
-        protected int difficulty;
-
-        public void Start()
+        protected int sudetingumas;
+        public void Pradzia()
         {
-            myHealth = enemyHealth = 100;
-            iHealed = enemyHealed = false;
-            isFighting = true;
-            paused = false;
+            manoGyvybes = 100;
+            priesoGyvybes = 100;
+            asPasigydziau = false;
+            priesasPasigyde = false;
+            vykstaMustynes = true;
+            sustabdyta = false;
         }
-
-        public void ReadFiles()
+        public void Nuskaitymas()
         {
-            var currentDirectory = Environment.CurrentDirectory;
-            actionDisplay = ReadActionDisplay(Path.Combine(currentDirectory, "imageFiles.txt"));
-            initialText = File.ReadAllText(Path.Combine(currentDirectory, "pradinisTekstas.txt"));
-            rules = File.ReadAllText(Path.Combine(currentDirectory, "taisykles.txt"));
-            farewell = File.ReadAllText(Path.Combine(currentDirectory, "atsisveikinimas.txt"));
-        }
-
-        private string[] ReadActionDisplay(string filePath)
-        {
-            string[] lines = File.ReadAllLines(filePath);
-            string[] display = new string[22];
-            for (int i = 0; i < display.Length; i++)
+            var CurrentDirectory = Environment.CurrentDirectory;
+            string filePath0 = Path.Combine(CurrentDirectory, @"imageFiles.txt");
+            string filePath1 = Path.Combine(CurrentDirectory, @"pradinisTekstas.txt");
+            string filePath2 = Path.Combine(CurrentDirectory, @"taisykles.txt");
+            string filePath3 = Path.Combine(CurrentDirectory, @"atsisveikinimas.txt");
+            List<string> lines = new List<string>();
+            lines = File.ReadAllLines(filePath0).ToList();
+            for (int i = 0; i < 22; i++)
             {
-                display[i] = String.Join("\n\t\t", lines, i * 9, Math.Min(9, lines.Length - i * 9));
+                int situation = i * 9;
+                for (int j = situation; j < situation + 9; j++)
+                    veiksmoVaizdas[i] += "\t\t" + lines[j] + '\n';
             }
-            return display;
+            lines = File.ReadAllLines(filePath1).ToList();
+            foreach(string line in lines)
+            {
+                pradinisTekstas += line + '\n';
+            }
+            lines = File.ReadAllLines(filePath2).ToList();
+            foreach (string line in lines)
+            {
+                taisykles += line + '\n';
+            }
+            lines = File.ReadAllLines(filePath3).ToList();
+            foreach (string line in lines)
+            {
+                atsisveikinimas += line + '\n';
+            }
         }
-
-        public char DisplayInitialScreen()
+        public char PradinisEkranas()
         {
-            SetupConsole(ConsoleColor.Blue);
-            Console.WriteLine(initialText);
-            return CheckInput("start");
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine(pradinisTekstas);
+            return Tikrinimas("pradzia");
         }
-
-        public void ChooseDifficulty()
+        public void SudetingumoPasirinkimas()
         {
-            SetupConsole(ConsoleColor.White);
-            DisplayDifficultyOptions();
-            difficulty = CheckInput("difficulty") - '0';
-        }
-        
-        private void DisplayDifficultyOptions()
-        {
-            string[] difficultyOptions = { "Lengvas", "Normalus", "Sunkus", "Neįveikiamas" };
-            ConsoleColor[] colors = { ConsoleColor.Green, ConsoleColor.Yellow, ConsoleColor.Red, ConsoleColor.Magenta };
-
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("\t\t_________________________________________");
             Console.WriteLine("\t\t|\t\t\t\t\t|");
             Console.WriteLine("\t\t|\t Pasirinkite sudėtingumą \t|");
             Console.WriteLine("\t\t|---------------------------------------|");
             Console.WriteLine("\t\t|\t\t\t\t\t|");
-
-            for (int i = 0; i < difficultyOptions.Length; i++)
-            {
-                Console.ForegroundColor = colors[i];
-                Console.WriteLine($"\t\t|\t[ {i + 1} ] - {difficultyOptions[i]}\t\t|");
-            }
-
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\t\t|\t[ 1 ] - Lengvas\t\t\t|");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\t\t|\t[ 2 ] - Normalus\t\t|");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\t\t|\t[ 3 ] - Sunkus\t\t\t|");
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("\t\t|\t[ 4 ] - Neiveikiamas\t\t|");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("\t\t|_______________________________________|");
+            sudetingumas = Tikrinimas("sudetingumas") - '0';
         }
-
-        public void DisplayRules()
+        public void Taisykles()
         {
-            SetupConsole(ConsoleColor.Yellow);
-            Console.WriteLine(rules);
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(taisykles);
             Console.ReadKey();
         }
-
-        public void DisplayGameScreen(int index, ConsoleColor color)
+        public void ZaidimoEkranas(int x, char spalva)
         {
-            SetupConsole(ConsoleColor.Magenta);
-            Console.WriteLine("\t[Q] Exit to game menu");
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("\t[Q] Išeiti į žaidimo meniu");
             Console.WriteLine("\t_________________________________________________________________________");
-            Console.WriteLine($"\t|   ENEMY HEALTH: {enemyHealth}\t\t\t\t\t\t\t|");
+            Console.WriteLine("\t|                                                                       |");
+            Console.WriteLine("\t|   PRIEŠO GYVYBĖS: {0}\t\t\t\t\t\t\t|", priesoGyvybes);
             Console.WriteLine("\t|_______________________________________________________________________|");
-
-            Console.ForegroundColor = color;
-            Console.WriteLine("\n\n{0}\n", actionDisplay[index]);
-
+            switch (spalva)
+            {
+                case 'W':
+                    Console.ForegroundColor = ConsoleColor.White;
+                    break;
+                case 'Y':
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case 'R':
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case 'G':
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    break;
+                default:
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    break;
+            }
+            Console.WriteLine("\n\n{0}\n", veiksmoVaizdas[x]);
             Console.ForegroundColor = ConsoleColor.Cyan;
-            DisplayPlayerOptions();
+            Console.WriteLine("\t_________________________________________________________________________");
+            Console.WriteLine("\t|                                                                       |");
+            Console.WriteLine("\t|   MANO GYVYBĖS: {0}\t\t\t\t\t\t\t|", manoGyvybes);
+            Console.WriteLine("\t|   [1] - STOVĖSENA    [2] - ŠNYPŠTIMAS    [3] - LETENĖLĖS ATAKA        |");
+            int temp;
+            if (asPasigydziau)
+                temp = 0;
+            else temp = 1;
+            Console.WriteLine("\t|   [H] - PASIGYDYTI({0})                                                 |", temp);
+            Console.WriteLine("\t|-----------------------------------------------------------------------|");
+            Console.WriteLine("\t|  GALIMOS KOMBINACIJOS:                                                |");
+            Console.WriteLine("\t|  [1][1][1]  ->  LIŪTO POZA                                            |");
+            Console.WriteLine("\t|  [2][2][2]  ->  DRAKONO UGNIS                                         |");
+            Console.WriteLine("\t|  [3][3][3]  ->  GELEŽINĖ LETENĖLĖ                                     |");
+            Console.WriteLine("\t|  [1][2][3]  ->  ULTIMATE FORMA                                        |");
+            Console.WriteLine("\t|_______________________________________________________________________|");
             Console.ForegroundColor = ConsoleColor.White;
         }
-
-        private void DisplayPlayerOptions()
+        public char Tikrinimas(string x)
         {
-            Console.WriteLine("\t_________________________________________________________________________");
-            Console.WriteLine($"\t|   MY HEALTH: {myHealth}\t\t\t\t\t\t\t|");
-            Console.WriteLine("\t|   [1] - STANCE    [2] - HISS    [3] - PAW ATTACK                  |");
-            Console.WriteLine($"\t|   [H] - HEAL({(iHealed ? 0 : 1)})                                             |");
-            Console.WriteLine("\t|-----------------------------------------------------------------------|");
-            Console.WriteLine("\t|  POSSIBLE COMBINATIONS:                                              |");
-            Console.WriteLine("\t|  [1][1][1]  ->  LION'S POSE                                          |");
-            Console.WriteLine("\t|  [2][2][2]  ->  DRAGON'S FIRE                                        |");
-            Console.WriteLine("\t|  [3][3][3]  ->  IRON SHIELD                                          |");
-            Console.WriteLine("\t|  [1][2][3]  ->  ULTIMATE FORM                                        |");
-            Console.WriteLine("\t|_______________________________________________________________________|");
-        }
-
-        private char CheckInput(string context)
-        {
-            char input = Console.ReadKey().KeyChar;
-            while (!IsValidInput(context, input))
+            char pasirinkimas = Console.ReadKey().KeyChar;
+            switch (x)
             {
-                Console.WriteLine("\nNetinkamas pasirinkimas. Iveskite is naujo: ");
-                input = Console.ReadKey().KeyChar;
-            }
-            return input;
-        }
-
-        private bool IsValidInput(string context, char input)
-        {
-            switch (context)
-            {
-                case "start":
-                    return input == '1' || input == '0';
-                case "difficulty":
-                    return input >= '1' && input <= '4';
+                case "pradzia":
+                    while (pasirinkimas != '1' && pasirinkimas != '0')
+                    {
+                        Console.WriteLine("\nNetinkamas pasirinkimas. Iveskite is naujo: ");
+                        pasirinkimas = Console.ReadKey().KeyChar;
+                    }
+                    break;
                 default:
-                    return false;
+                    while (pasirinkimas != '1' && pasirinkimas != '2' && pasirinkimas != '3' && pasirinkimas != '4')
+                    {
+                        Console.WriteLine("\nNetinkamas pasirinkimas. Iveskite is naujo: ");
+                        pasirinkimas = Console.ReadKey().KeyChar;
+                    }
+                    break;
+            }
+            return pasirinkimas;
+        }
+        public void VeiksmuIsvedimas(string manoVeiksmas, string priesoVeiksmas, int kasLaimejo)
+        {
+            if (kasLaimejo == 1)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n\t\t\tMANO VEIKSMAS - {0}", manoVeiksmas);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\t\t\tPRIEŠO VEIKSMAS - {0}", priesoVeiksmas);
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\n\t\t\tMANO VEIKSMAS - {0}", manoVeiksmas);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\t\t\tPRIEŠO VEIKSMAS - {0}", priesoVeiksmas);
             }
         }
-
-        public void PerformActions(string myAction, string enemyAction, int winner)
+        public void PabaigosEkranas(string tekstas, char spalva)
         {
-            ConsoleColor myColor = winner == 1 ? ConsoleColor.Green : ConsoleColor.Red;
-            ConsoleColor enemyColor = winner == 1 ? ConsoleColor.Red : ConsoleColor.Green;
-
-            Console.ForegroundColor = myColor;
-            Console.WriteLine($"\n\t\t\tMY ACTION - {myAction}");
-            Console.ForegroundColor = enemyColor;
-            Console.WriteLine($"\t\t\tENEMY ACTION - {enemyAction}");
-            Console.ResetColor();
-        }
-
-        public void DisplayEndScreen(string text, ConsoleColor color)
-        {
-            SetupConsole(color);
+            switch (spalva)
+            {
+                case 'G':
+                    ZaidimoEkranas(20, 'G');
+                    Console.BackgroundColor = ConsoleColor.Green;
+                    break;
+                default:
+                    ZaidimoEkranas(21, 'R');
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    break;
+            }
+            
             Console.WriteLine("\n\t\t_________________________________________________________");
             Console.WriteLine("\t\t|\t\t\t\t\t\t\t|");
-            Console.WriteLine($"\t\t| {text} |");
+            Console.WriteLine("\t\t|{0}|", tekstas);
             Console.WriteLine("\t\t|_______________________________________________________|\n");
-            PauseGame();
+            Console.BackgroundColor = ConsoleColor.Black;
+            Sustabdymas();
         }
-
-        public void SayGoodbye()
+        public void Atsisveikinimas()
         {
-            SetupConsole(ConsoleColor.Green);
-            Console.WriteLine(farewell);
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(atsisveikinimas);
             Console.ReadKey();
         }
-
-        public void PauseGame()
+        public void Sustabdymas()
         {
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.Black;
-            Console.WriteLine("\n\nPress any key to continue: ");
+            Console.WriteLine("\n\nPaspauskite bet ką, kad tęsti: ");
             Console.ReadKey();
         }
-
-        public void ClearActionQueues()
+        public void Istrinimas()
         {
-            myActions.Clear();
-            enemyActions.Clear();
-        }
-
-        private void SetupConsole(ConsoleColor color)
-        {
-            Console.Clear();
-            Console.ForegroundColor = color;
+            manoVeiksmai.Clear();
+            priesoVeiksmai.Clear();
         }
     }
 }
+
