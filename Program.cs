@@ -1,26 +1,31 @@
-﻿namespace ADS
+﻿// path/filename: ADS/Program.cs
+using System;
+using static ADS.Game;
+
+namespace ADS
 {
     class Program
     {
         static void Main(string[] args)
         {
-            int pasirinkimas;
-            Zaidimas zaidimas = new Zaidimas();
-            zaidimas.Nuskaitymas(); 
+            int choice;
+            Game game = new Game();
+            game.ReadFiles();
+
             while (true)
             {
-                zaidimas.Pradzia();
-                pasirinkimas = zaidimas.PradinisEkranas() - '0';
-                if (pasirinkimas == 1)
+                game.Start();
+                choice = game.DisplayInitialScreen() - '0';
+                if (choice == 1)
                 {
-                    zaidimas.SudetingumoPasirinkimas();
-                    zaidimas.Taisykles();
-                    zaidimas.Paleidimas();
-                    zaidimas.Istrinimas();
+                    game.ChooseDifficulty();
+                    game.DisplayRules();
+                    game.Launch();
+                    game.ClearActionQueues();
                 }
                 else
                 {
-                    zaidimas.Atsisveikinimas();
+                    game.SayGoodbye();
                     break;
                 }
             }
