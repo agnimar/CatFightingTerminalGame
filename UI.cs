@@ -46,27 +46,20 @@ namespace ADS
             return display;
         }
 
-        private IEnumerable<string> ReadFileLines(string filePath)
-        {
-            return File.ReadAllLines(filePath);
-        }
-
         public char DisplayInitialScreen()
         {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Blue;
+            SetupConsole(ConsoleColor.Blue);
             Console.WriteLine(initialText);
             return CheckInput("start");
         }
 
         public void ChooseDifficulty()
         {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.White;
+            SetupConsole(ConsoleColor.White);
             DisplayDifficultyOptions();
             difficulty = CheckInput("difficulty") - '0';
         }
-
+        
         private void DisplayDifficultyOptions()
         {
             string[] difficultyOptions = { "Lengvas", "Normalus", "Sunkus", "Neįveikiamas" };
@@ -88,19 +81,16 @@ namespace ADS
             Console.WriteLine("\t\t|_______________________________________|");
         }
 
-
         public void DisplayRules()
         {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            SetupConsole(ConsoleColor.Yellow);
             Console.WriteLine(rules);
             Console.ReadKey();
         }
 
         public void DisplayGameScreen(int index, ConsoleColor color)
         {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Magenta;
+            SetupConsole(ConsoleColor.Magenta);
             Console.WriteLine("\t[Q] Exit to game menu");
             Console.WriteLine("\t_________________________________________________________________________");
             Console.WriteLine($"\t|   ENEMY HEALTH: {enemyHealth}\t\t\t\t\t\t\t|");
@@ -118,7 +108,7 @@ namespace ADS
         {
             Console.WriteLine("\t_________________________________________________________________________");
             Console.WriteLine($"\t|   MY HEALTH: {myHealth}\t\t\t\t\t\t\t|");
-            Console.WriteLine("\t|   [1] - STANCE    [2] - SNEAK    [3] - SHIELD ATTACK                  |");
+            Console.WriteLine("\t|   [1] - STANCE    [2] - HISS    [3] - PAW ATTACK                  |");
             Console.WriteLine($"\t|   [H] - HEAL({(iHealed ? 0 : 1)})                                             |");
             Console.WriteLine("\t|-----------------------------------------------------------------------|");
             Console.WriteLine("\t|  POSSIBLE COMBINATIONS:                                              |");
@@ -132,26 +122,27 @@ namespace ADS
         private char CheckInput(string context)
         {
             char input = Console.ReadKey().KeyChar;
-            switch (context)
+            while (!IsValidInput(context, input))
             {
-                case "start":
-                    while (input != '1' && input != '0')
-                    {
-                        Console.WriteLine("\nNetinkamas pasirinkimas. Iveskite is naujo: ");
-                        input = Console.ReadKey().KeyChar;
-                    }
-                    break;
-                case "difficulty":
-                    while (input < '1' || input > '4')
-                    {
-                        Console.WriteLine("\nNetinkamas pasirinkimas. Iveskite is naujo: ");
-                        input = Console.ReadKey().KeyChar;
-                    }
-                    break;
-                    // Add other contexts if necessary
+                Console.WriteLine("\nNetinkamas pasirinkimas. Iveskite is naujo: ");
+                input = Console.ReadKey().KeyChar;
             }
             return input;
         }
+
+        private bool IsValidInput(string context, char input)
+        {
+            switch (context)
+            {
+                case "start":
+                    return input == '1' || input == '0';
+                case "difficulty":
+                    return input >= '1' && input <= '4';
+                default:
+                    return false;
+            }
+        }
+
 
         public void PerformActions(string myAction, string enemyAction, int winner)
         {
@@ -167,8 +158,7 @@ namespace ADS
 
         public void DisplayEndScreen(string text, ConsoleColor color)
         {
-            Console.Clear();
-            Console.ForegroundColor = color;
+            SetupConsole(color);
             Console.WriteLine("\n\t\t_________________________________________________________");
             Console.WriteLine("\t\t|\t\t\t\t\t\t\t|");
             Console.WriteLine($"\t\t| {text} |");
@@ -178,8 +168,7 @@ namespace ADS
 
         public void SayGoodbye()
         {
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Green;
+            SetupConsole(ConsoleColor.Green);
             Console.WriteLine(farewell);
             Console.ReadKey();
         }
@@ -198,5 +187,10 @@ namespace ADS
             enemyActions.Clear();
         }
 
+        private void SetupConsole(ConsoleColor color)
+        {
+            Console.Clear();
+            Console.ForegroundColor = color;
+        }
     }
 }

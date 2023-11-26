@@ -1,5 +1,6 @@
 ﻿// path/filename: ADS/Program.cs
 using System;
+using static ADS.Game;
 
 namespace ADS
 {
@@ -8,7 +9,7 @@ namespace ADS
         static void Main(string[] args)
         {
             int choice;
-            Game game = new Game(); 
+            Game game = new Game();
             game.ReadFiles();
 
             while (true)
