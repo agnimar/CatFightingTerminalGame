@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ADS
 {
@@ -19,8 +16,6 @@ namespace ADS
             }
             HandleEndGame();
         }
-
-        
 
         private char HandleActionInput()
         {

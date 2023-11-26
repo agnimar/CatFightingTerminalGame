@@ -143,7 +143,6 @@ namespace ADS
             }
         }
 
-
         public void PerformActions(string myAction, string enemyAction, int winner)
         {
             ConsoleColor myColor = winner == 1 ? ConsoleColor.Green : ConsoleColor.Red;
